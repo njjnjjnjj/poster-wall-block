@@ -1,11 +1,11 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "create-block/poster-wall-block",
+	"name": "njjnjjnjj/poster-wall-block",
 	"version": "0.1.0",
-	"title": "Poster Wall Block",
+	"title": "Poster Wall",
 	"category": "widgets",
-	"description": "Display your site's copyright date.",
+	"description": "Show Poster Wall in your page or post;",
 	"example": {},
 	"attributes": {
 		"fallbackCurrentYear": {
