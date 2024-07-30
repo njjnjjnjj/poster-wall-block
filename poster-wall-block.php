@@ -53,6 +53,7 @@ add_action('rest_api_init', 'register_douban_proxy_endpoint');
 function fetch_douban_data(WP_REST_Request $request)
 {
 	$keyword = $request->get_param('q');
+	// $type = $request->get_param('type');
 	$response = wp_remote_get("https://www.douban.com/j/search_suggest?q={$keyword}");
 
 	if (is_wp_error($response)) {
@@ -61,6 +62,14 @@ function fetch_douban_data(WP_REST_Request $request)
 
 	$body = wp_remote_retrieve_body($response);
 	$data = json_decode($body, true);
+	// TODO: 处理 data，将 data.cards 进行筛选，筛选条件为 type 属性，现在的版本会出现数据类型被转换的问题
+	// 处理 data，将 data.cards 进行筛选，筛选条件为 type 属性
+	// Filter cards based on type
+	// if (!empty($type) && !empty($data['cards'])) {
+	// 	$data['cards'] = array_filter($data['cards'], function ($card) use ($type) {
+	// 		return isset($card['type']) && $card['type'] === $type;
+	// 	});
+	// }
 
 	return rest_ensure_response($data);
 	// return $request->get_param('q');

@@ -10,6 +10,9 @@
 	"attributes": {
 		"keyword": {
 			"type": "string"
+		},
+		"type":{
+			"type": "string"
 		}
 	},
 	"supports": {
