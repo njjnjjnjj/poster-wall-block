@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Poster Wall Block
- * Description:       Display your site&#39;s copyright date.
+ * Description:       Show Poster Wall in your page or post;
  * Version:           0.1.0
  * Requires at least: 6.2
  * Requires PHP:      7.0
@@ -13,7 +13,7 @@
  * @package           create-block
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
+if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly.
 }
 
@@ -24,7 +24,44 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
-function create_block_poster_wall_block_init() {
-	register_block_type( __DIR__ . '/build' );
+function create_block_poster_wall_block_init()
+{
+	register_block_type(__DIR__ . '/build');
 }
-add_action( 'init', 'create_block_poster_wall_block_init' );
+add_action('init', 'create_block_poster_wall_block_init');
+
+/**
+ * Registers a custom REST API endpoint for fetching data from Douban.
+ */
+function register_douban_proxy_endpoint()
+{
+	register_rest_route(
+		'poster-wall-block/v1',
+		'/douban/',
+		array(
+			'methods' => 'GET',
+			'callback' => 'fetch_douban_data',
+			'permission_callback' => '__return_true'
+		)
+	);
+}
+add_action('rest_api_init', 'register_douban_proxy_endpoint');
+
+/**
+ * Callback function for the custom REST API endpoint.
+ */
+function fetch_douban_data(WP_REST_Request $request)
+{
+	// $keyword = $request->get_param('q');
+	// $response = wp_remote_get("https://www.douban.com/j/search_suggest?q={$keyword}");
+
+	// if (is_wp_error($response)) {
+	// 	return new WP_Error('external_api_error', 'Error calling external API', array('status' => 500));
+	// }
+
+	// $body = wp_remote_retrieve_body($response);
+	// $data = json_decode($body, true);
+
+	// return rest_ensure_response($data);
+	return $request->get_param('q');
+}

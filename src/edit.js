@@ -3,7 +3,7 @@
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
  */
-import { __ } from '@wordpress/i18n';
+import { __ } from "@wordpress/i18n";
 
 /**
  * Imports the InspectorControls component, which is used to wrap
@@ -16,7 +16,7 @@ import { __ } from '@wordpress/i18n';
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#inspectorcontrols
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
 
 /**
  * Imports the necessary components that will be used to create
@@ -26,7 +26,7 @@ import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
  * @see https://developer.wordpress.org/block-editor/reference-guides/components/text-control/
  * @see https://developer.wordpress.org/block-editor/reference-guides/components/toggle-control/
  */
-import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
+import { PanelBody, TextControl, ToggleControl } from "@wordpress/components";
 
 /**
  * Imports the useEffect React Hook. This is used to set an attribute when the
@@ -34,7 +34,8 @@ import { PanelBody, TextControl, ToggleControl } from '@wordpress/components';
  *
  * @see https://react.dev/reference/react/useEffect
  */
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import axios from "axios";
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -48,57 +49,32 @@ import { useEffect } from 'react';
  *
  * @return {Element} Element to render.
  */
-export default function Edit( { attributes, setAttributes } ) {
-	const { fallbackCurrentYear, showStartingYear, startingYear } = attributes;
+export default function Edit({ attributes, setAttributes }) {
+  const { keyword } = attributes;
 
-	// Get the current year and make sure it's a string.
-	const currentYear = new Date().getFullYear().toString();
+  // 调用 https://www.douban.com/j/search_suggest?q=${keyword}
+  const apiUrl = `/wp-json/poster-wall-block/v1/douban?q=${encodeURIComponent(keyword)}`;
+  useEffect(() => {
+    axios
+      .get(apiUrl)
+      .then((response) => {
+        debugger;
+        console.log(response.data);
+      });
+  }, [keyword]);
 
-	// When the block loads, set the fallbackCurrentYear attribute to the
-	// current year if it's not already set.
-	useEffect( () => {
-		if ( currentYear !== fallbackCurrentYear ) {
-			setAttributes( { fallbackCurrentYear: currentYear } );
-		}
-	}, [ currentYear, fallbackCurrentYear, setAttributes ] );
-
-	let displayDate;
-
-	// Display the starting year as well if supplied by the user.
-	if ( showStartingYear && startingYear ) {
-		displayDate = startingYear + '–' + currentYear;
-	} else {
-		displayDate = currentYear;
-	}
-
-	return (
-		<>
-			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'poster-wall-block' ) }>
-					<ToggleControl
-						checked={ showStartingYear }
-						label={ __(
-							'Show starting year',
-							'poster-wall-block'
-						) }
-						onChange={ () =>
-							setAttributes( {
-								showStartingYear: ! showStartingYear,
-							} )
-						}
-					/>
-					{ showStartingYear && (
-						<TextControl
-							label={ __( 'Starting year', 'poster-wall-block' ) }
-							value={ startingYear }
-							onChange={ ( value ) =>
-								setAttributes( { startingYear: value } )
-							}
-						/>
-					) }
-				</PanelBody>
-			</InspectorControls>
-			<p { ...useBlockProps() }>© { displayDate }</p>
-		</>
-	);
+  return (
+    <>
+      <InspectorControls>
+        <PanelBody title={__("Settings", "poster-wall-block")}>
+          <TextControl
+            label={__("Keyword", "poster-wall-block")}
+            value={keyword}
+            onChange={(value) => setAttributes({ keyword: value })}
+          />
+        </PanelBody>
+      </InspectorControls>
+      <p {...useBlockProps()}>{keyword}</p>
+    </>
+  );
 }

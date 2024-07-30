@@ -8,13 +8,7 @@
 	"description": "Show Poster Wall in your page or post;",
 	"example": {},
 	"attributes": {
-		"fallbackCurrentYear": {
-			"type": "string"
-		},
-		"showStartingYear": {
-			"type": "boolean"
-		},
-		"startingYear": {
+		"keyword": {
 			"type": "string"
 		}
 	},
