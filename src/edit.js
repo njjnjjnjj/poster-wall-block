@@ -1,67 +1,30 @@
-/**
- * Retrieves the translation of text.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-i18n/
- */
 import { __ } from "@wordpress/i18n";
-
-/**
- * Imports the InspectorControls component, which is used to wrap
- * the block's custom controls that will appear in in the Settings
- * Sidebar when the block is selected.
- *
- * Also imports the React hook that is used to mark the block wrapper
- * element. It provides all the necessary props like the class name.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#inspectorcontrols
- * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
- */
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
-
-/**
- * Imports the necessary components that will be used to create
- * the user interface for the block's settings.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/components/panel/#panelbody
- * @see https://developer.wordpress.org/block-editor/reference-guides/components/text-control/
- * @see https://developer.wordpress.org/block-editor/reference-guides/components/toggle-control/
- */
-import { PanelBody, TextControl, ToggleControl } from "@wordpress/components";
-
-/**
- * Imports the useEffect React Hook. This is used to set an attribute when the
- * block is loaded in the Editor.
- *
- * @see https://react.dev/reference/react/useEffect
- */
-import { useEffect } from "react";
+import { PanelBody, TextControl, Button } from "@wordpress/components";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
-/**
- * The edit function describes the structure of your block in the context of the
- * editor. This represents what the editor will render when the block is used.
- *
- * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-edit-save/#edit
- *
- * @param {Object}   props               Properties passed to the function.
- * @param {Object}   props.attributes    Available block attributes.
- * @param {Function} props.setAttributes Function that updates individual attributes.
- *
- * @return {Element} Element to render.
- */
 export default function Edit({ attributes, setAttributes }) {
   const { keyword } = attributes;
+  const [searchKeyword, setSearchKeyword] = useState(keyword);
+  const [results, setResults] = useState([]);
 
-  // 调用 https://www.douban.com/j/search_suggest?q=${keyword}
-  const apiUrl = `/wp-json/poster-wall-block/v1/douban?q=${encodeURIComponent(keyword)}`;
+  const apiUrl = `/wp-json/poster-wall-block/v1/douban?q=${encodeURIComponent(
+    searchKeyword
+  )}`;
+
   useEffect(() => {
-    axios
-      .get(apiUrl)
-      .then((response) => {
-        debugger;
-        console.log(response.data);
+    if (searchKeyword) {
+      axios.get(apiUrl).then((response) => {
+        const data = response.data;
+        setResults(data.cards || []);
       });
-  }, [keyword]);
+    }
+  }, [searchKeyword]);
+
+  const handleSearchClick = () => {
+    setSearchKeyword(keyword);
+  };
 
   return (
     <>
@@ -72,9 +35,42 @@ export default function Edit({ attributes, setAttributes }) {
             value={keyword}
             onChange={(value) => setAttributes({ keyword: value })}
           />
+          <Button variant="primary" onClick={handleSearchClick}>
+            {__("Search", "poster-wall-block")}
+          </Button>
         </PanelBody>
       </InspectorControls>
-      <p {...useBlockProps()}>{keyword}</p>
+      <div {...useBlockProps()}>
+        {results.map((card, index) => (
+          <div key={index} className="poster-card">
+            <a href={card.url} target="_blank" rel="noopener noreferrer">
+              <img src={card.cover_url} alt={card.title} />
+            </a>
+            <div className="poster-card-info">
+              <h3>{card.title}</h3>
+              <p>{card.card_subtitle}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      <style>
+        {`
+          .poster-card {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+          }
+          .poster-card img {
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+          }
+          .poster-card-info {
+            margin-top: 10px;
+          }
+        `}
+      </style>
     </>
   );
 }

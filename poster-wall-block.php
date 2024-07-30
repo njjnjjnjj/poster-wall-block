@@ -52,16 +52,16 @@ add_action('rest_api_init', 'register_douban_proxy_endpoint');
  */
 function fetch_douban_data(WP_REST_Request $request)
 {
-	// $keyword = $request->get_param('q');
-	// $response = wp_remote_get("https://www.douban.com/j/search_suggest?q={$keyword}");
+	$keyword = $request->get_param('q');
+	$response = wp_remote_get("https://www.douban.com/j/search_suggest?q={$keyword}");
 
-	// if (is_wp_error($response)) {
-	// 	return new WP_Error('external_api_error', 'Error calling external API', array('status' => 500));
-	// }
+	if (is_wp_error($response)) {
+		return new WP_Error('external_api_error', 'Error calling external API', array('status' => 500));
+	}
 
-	// $body = wp_remote_retrieve_body($response);
-	// $data = json_decode($body, true);
+	$body = wp_remote_retrieve_body($response);
+	$data = json_decode($body, true);
 
-	// return rest_ensure_response($data);
-	return $request->get_param('q');
+	return rest_ensure_response($data);
+	// return $request->get_param('q');
 }
