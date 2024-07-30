@@ -1,6 +1,6 @@
 import { __ } from "@wordpress/i18n";
 import { InspectorControls, useBlockProps } from "@wordpress/block-editor";
-import { PanelBody, TextControl, Button } from "@wordpress/components";
+import { PanelBody, TextControl, Button, Spinner } from "@wordpress/components";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -8,6 +8,7 @@ export default function Edit({ attributes, setAttributes }) {
   const { keyword } = attributes;
   const [searchKeyword, setSearchKeyword] = useState(keyword);
   const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const apiUrl = `/wp-json/poster-wall-block/v1/douban?q=${encodeURIComponent(
     searchKeyword
@@ -15,9 +16,13 @@ export default function Edit({ attributes, setAttributes }) {
 
   useEffect(() => {
     if (searchKeyword) {
+      setLoading(true);
       axios.get(apiUrl).then((response) => {
         const data = response.data;
         setResults(data.cards || []);
+        setLoading(false);
+      }).catch(() => {
+        setLoading(false);
       });
     }
   }, [searchKeyword]);
@@ -41,7 +46,13 @@ export default function Edit({ attributes, setAttributes }) {
         </PanelBody>
       </InspectorControls>
       <div {...useBlockProps()}>
-        {results.map((card, index) => (
+        {loading && (
+          <div className="loading">
+            <Spinner />
+            <p>{__("Loading...", "poster-wall-block")}</p>
+          </div>
+        )}
+        {!loading && results.map((card, index) => (
           <div key={index} className="poster-card">
             <a href={card.url} target="_blank" rel="noopener noreferrer">
               <img src={card.cover_url} alt={card.title} />
@@ -55,6 +66,12 @@ export default function Edit({ attributes, setAttributes }) {
       </div>
       <style>
         {`
+          .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+          }
           .poster-card {
             display: inline-block;
             margin: 10px;
