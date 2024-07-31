@@ -11,9 +11,9 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Edit({ attributes, setAttributes }) {
-  const { keyword, type } = attributes;
+  const { keyword = "", type = "movie" } = attributes; // 设置默认值
   const [searchKeyword, setSearchKeyword] = useState(keyword);
-  const [searchType, setSearchType] = useState(type || "movie");
+  const [searchType, setSearchType] = useState(type);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -27,9 +27,7 @@ export default function Edit({ attributes, setAttributes }) {
       axios
         .get(apiUrl)
         .then((response) => {
-          debugger
           const data = response.data;
-          // 处理 cards 将 type 属性不等于 searchType 的数据过滤掉
           if (data.cards) {
             data.cards = data.cards.filter((card) => card.type === searchType);
           }
